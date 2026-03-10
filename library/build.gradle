@@ -1,4 +1,7 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 ext {
     bintrayRepo = 'maven'
@@ -56,6 +59,12 @@ android {
         abortOnError false
     }
 
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -63,3 +72,25 @@ dependencies {
     api 'io.github.oothp:pdfium-android:1.9.5-beta01'
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "dream-space"
+                artifactId = "AndroidPdfViewer"
+                version = "1.0.0-all"
+            }
+        }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/dream-space/AndroidPdfViewer")
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                    password = project.findProperty("gpr.key") ?: System.getenv("PASSWORD")
+                }
+            }
+        }
+    }
+}
